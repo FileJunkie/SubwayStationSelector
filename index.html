@@ -90,5 +90,28 @@
         </tbody>
     </table>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+            // Load saved states from localStorage
+            checkboxes.forEach(checkbox => {
+                const stationName = checkbox.parentElement.previousElementSibling.textContent;
+                const isChecked = localStorage.getItem(stationName);
+                if (isChecked === 'true') {
+                    checkbox.checked = true;
+                }
+            });
+
+            // Save state to localStorage on change
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', event => {
+                    const stationName = event.target.parentElement.previousElementSibling.textContent;
+                    localStorage.setItem(stationName, event.target.checked);
+                });
+            });
+        });
+    </script>
+
 </body>
 </html>
