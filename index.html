@@ -90,9 +90,20 @@
         </tbody>
     </table>
 
+    <div>
+        <label for="stationCount">Сколько станций выбрать:</label>
+        <input type="number" id="stationCount" name="stationCount" min="1">
+        <button id="randomizeButton">Выбрать</button>
+    </div>
+
+    <div id="selectedStationsOutput"></div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const stationCountInput = document.getElementById('stationCount');
+            const randomizeButton = document.getElementById('randomizeButton');
+            const outputDiv = document.getElementById('selectedStationsOutput');
 
             // Load saved states from localStorage
             checkboxes.forEach(checkbox => {
@@ -109,6 +120,42 @@
                     const stationName = event.target.parentElement.previousElementSibling.textContent;
                     localStorage.setItem(stationName, event.target.checked);
                 });
+            });
+
+            // Randomize selection
+            randomizeButton.addEventListener('click', () => {
+                const count = parseInt(stationCountInput.value, 10);
+                if (isNaN(count) || count <= 0) {
+                    alert('Пожалуйста, введите корректное количество станций.');
+                    return;
+                }
+
+                // Filter for available (unchecked) stations
+                const availableCheckboxes = Array.from(document.querySelectorAll('input[type="checkbox"]:not(:checked)'));
+
+                if (count > availableCheckboxes.length) {
+                    alert('Вы запросили больше станций, чем доступно для выбора.');
+                    return;
+                }
+                
+                // Get corresponding station elements for available checkboxes
+                const availableStations = availableCheckboxes.map(cb => cb.parentElement.previousElementSibling);
+
+                // Shuffle and pick
+                const shuffledStations = availableStations.sort(() => 0.5 - Math.random());
+                const selectedStations = shuffledStations.slice(0, count);
+
+                let selectedNames = [];
+                // Check the selected ones
+                selectedStations.forEach(stationEl => {
+                    const checkbox = stationEl.nextElementSibling.querySelector('input[type="checkbox"]');
+                    checkbox.checked = true;
+                    selectedNames.push(stationEl.textContent);
+                    // Manually trigger change to update localStorage
+                    checkbox.dispatchEvent(new Event('change'));
+                });
+
+                outputDiv.innerHTML = '<strong>Выбранные станции:</strong> ' + selectedNames.join(', ');
             });
         });
     </script>
